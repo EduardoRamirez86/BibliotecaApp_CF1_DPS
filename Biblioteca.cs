@@ -1,18 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BibliotecaApp.Models;
 
-namespace GestionBiblioteca
+namespace BibliotecaApp
 {
     public class Biblioteca
     {
         public List<Libro> Libros { get; set; }
         public List<Usuario> Usuarios { get; set; }
         public List<Prestamo> Prestamos { get; set; }
-
-        private int siguienteIdLibro = 1;
-        private int siguienteIdUsuario = 1;
-        private int siguienteIdPrestamo = 1;
 
         public Biblioteca()
         {
@@ -21,21 +18,19 @@ namespace GestionBiblioteca
             Prestamos = new List<Prestamo>();
         }
 
-        public Libro AgregarLibro(string titulo, string autor, string isbn, int cantidad)
+        public void AgregarLibro(Libro libro)
         {
-            Libro libro = new Libro(siguienteIdLibro++, titulo, autor, isbn, cantidad);
-            Libros.Add(libro);
-            return libro;
+            if (libro != null)
+                Libros.Add(libro);
         }
 
-        public Usuario RegistrarUsuario(string nombre, string email)
+        public void RegistrarUsuario(Usuario usuario)
         {
-            Usuario usuario = new Usuario(siguienteIdUsuario++, nombre, email);
-            Usuarios.Add(usuario);
-            return usuario;
+            if (usuario != null)
+                Usuarios.Add(usuario);
         }
 
-        public Prestamo PrestarLibro(int idLibro, int idUsuario)
+        public Prestamo PrestarLibro(Guid idLibro, Guid idUsuario)
         {
             Libro libro = Libros.FirstOrDefault(l => l.Id == idLibro);
             Usuario usuario = Usuarios.FirstOrDefault(u => u.Id == idUsuario);
@@ -43,29 +38,37 @@ namespace GestionBiblioteca
             if (libro == null || usuario == null || !libro.HayDisponibilidad())
                 return null;
 
-            Prestamo prestamo = new Prestamo(siguienteIdPrestamo++, libro, usuario);
+            if (libro is LibroFisico libroFisico)
+            {
+                libroFisico.RealizarPrestamo();
+            }
+
+            Prestamo prestamo = new Prestamo(usuario, libro);
             Prestamos.Add(prestamo);
-            libro.CantidadDisponible--;
 
             return prestamo;
         }
 
-        public bool DevolverLibro(int idPrestamo)
+        public bool DevolverLibro(Guid idPrestamo)
         {
-            Prestamo prestamo = Prestamos.FirstOrDefault(p => p.Id == idPrestamo && !p.Devuelto);
+            Prestamo prestamo = Prestamos.FirstOrDefault(p => p.EstaActivo && p.Id == idPrestamo);
 
             if (prestamo == null)
                 return false;
 
-            prestamo.MarcarDevuelto();
-            prestamo.Libro.CantidadDisponible++;
+            prestamo.RegistrarDevolucion();
+
+            if (prestamo.Libro is LibroFisico libroFisico)
+            {
+                libroFisico.RegistrarDevolucion();
+            }
 
             return true;
         }
 
         public List<Prestamo> ListarPrestamosActivos()
         {
-            return Prestamos.Where(p => !p.Devuelto).ToList();
+            return Prestamos.Where(p => p.EstaActivo).ToList();
         }
     }
 }
