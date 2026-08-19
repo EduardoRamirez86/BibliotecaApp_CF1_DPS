@@ -11,14 +11,10 @@ namespace BibliotecaApp
         {
             Biblioteca biblioteca = new Biblioteca();
 
-            // Datos iniciales de prueba
-            LibroFisico libro1 = new LibroFisico("Cien años de soledad", "Gabriel García Márquez", "978-03", 1967, "Novela", 3, "Estante A1");
-            LibroFisico libro2 = new LibroFisico("El Principito", "Antoine de Saint-Exupéry", "978-01", 1943, "Fábula", 5, "Estante B2");
-            Estudiante usuario1 = new Estudiante("Ana Torres", "01234567-8", "AT202401", "Ingeniería en Computación");
-
-            biblioteca.AgregarLibro(libro1);
-            biblioteca.AgregarLibro(libro2);
-            biblioteca.RegistrarUsuario(usuario1);
+            // ============================================================
+            //                         SEED DATA INICIAL
+            // ============================================================
+            InicializarSeedData(biblioteca);
 
             bool salir = false;
 
@@ -33,128 +29,75 @@ namespace BibliotecaApp
                 {
                     switch (opcion)
                     {
-                        case "1":
-                            ConsoleViews.Header("CATÁLOGO DE LIBROS");
-                            if (biblioteca.Libros.Count == 0)
-                                ConsoleViews.MensajeAdvertencia("No hay libros registrados.");
-                            else
+                        case "1": // Catálogo de Libros
+                            LibroView.RenderizarCatalogo(biblioteca.Libros);
+                            break;
+
+                        case "2": // Ver Usuarios
+                            UsuarioView.RenderizarLista(biblioteca.Usuarios);
+                            break;
+
+                        case "3": // Registrar Usuario
+                            var nuevoUsuario = UsuarioView.FormularioRegistro();
+                            if (nuevoUsuario != null)
                             {
-                                foreach (var lib in biblioteca.Libros)
-                                {
-                                    Console.WriteLine($"  Título: {lib.Titulo} - {lib.Autor}");
-                                    Console.WriteLine($"  Disponible: {(lib.HayDisponibilidad() ? "SÍ" : "NO")}\n");
-                                }
+                                biblioteca.RegistrarUsuario(nuevoUsuario);
+                                ConsoleViews.MensajeExito($"Usuario '{nuevoUsuario.Nombre}' registrado con éxito.");
                             }
                             break;
 
-                        case "2":
-                            ConsoleViews.Header("LISTADO DE USUARIOS");
-                            if (biblioteca.Usuarios.Count == 0)
-                                ConsoleViews.MensajeAdvertencia("No hay usuarios registrados.");
-                            else
+                        case "4": // Prestar Libro
+                            ConsoleViews.Header("NUEVO PRÉSTAMO");
+
+                            // 1. Seleccionar Usuario
+                            var usuarioPrestar = UsuarioView.FormularioSeleccionUsuario(biblioteca.Usuarios);
+                            if (usuarioPrestar == null) break;
+
+                            Console.WriteLine();
+
+                            // 2. Seleccionar Libro
+                            var libroPrestar = LibroView.FormularioSeleccionLibro(biblioteca.Libros);
+                            if (libroPrestar == null) break;
+
+                            // 3. Procesar préstamo
+                            var prestamo = biblioteca.PrestarLibro(libroPrestar.Id, usuarioPrestar.Id);
+                            if (prestamo != null)
                             {
-                                foreach (var user in biblioteca.Usuarios)
-                                {
-                                    Console.WriteLine($"  Nombre: {user.Nombre}");
-                                    // Mostramos el Carnet si es estudiante, si no, la Identificación general
-                                    string idMostrar = user is Estudiante est ? est.Carne : user.Identificacion;
-                                    Console.WriteLine($"  Carnet/ID: {idMostrar}\n");
-                                }
-                            }
-                            break;
-
-                        case "3":
-                            ConsoleViews.Header("REGISTRAR NUEVO ESTUDIANTE");
-                            string nombre = ConsoleViews.LeerTexto("Nombre del Estudiante");
-                            string identificacion = ConsoleViews.LeerTexto("DUI / Identificación");
-                            string carnet = ConsoleViews.LeerTexto("Carnet de la UDB");
-                            string carrera = ConsoleViews.LeerTexto("Carrera");
-
-                            Estudiante nuevoEstudiante = new Estudiante(nombre, identificacion, carnet, carrera);
-                            biblioteca.RegistrarUsuario(nuevoEstudiante);
-                            ConsoleViews.MensajeExito($"Estudiante '{nuevoEstudiante.Nombre}' registrado con éxito.");
-                            break;
-
-                        case "4":
-                            ConsoleViews.Header("PRESTAR UN LIBRO");
-                            // Búsqueda amigable
-                            string tituloLibro = ConsoleViews.LeerTexto("Ingrese el Título del Libro (o parte de él)");
-                            string carnetUsuario = ConsoleViews.LeerTexto("Ingrese el Carnet o Identificación del Usuario");
-
-                            // Buscamos internamente en la memoria
-                            var libroPrestar = biblioteca.Libros.FirstOrDefault(l => l.Titulo.ToLower().Contains(tituloLibro.ToLower()));
-                            var userPrestar = biblioteca.Usuarios.FirstOrDefault(u => u.Identificacion == carnetUsuario || (u is Estudiante e && e.Carne == carnetUsuario));
-
-                            if (libroPrestar != null && userPrestar != null)
-                            {
-                                // Si los encontramos, usamos sus IDs largos internamente sin que el usuario los vea
-                                var prestamo = biblioteca.PrestarLibro(libroPrestar.Id, userPrestar.Id);
-                                if (prestamo != null)
-                                    ConsoleViews.MensajeExito($"Préstamo realizado. Se entregó '{libroPrestar.Titulo}' a '{userPrestar.Nombre}'.");
-                                else
-                                    ConsoleViews.MensajeError("Error: Verifique que el libro tenga stock disponible.");
+                                Console.WriteLine();
+                                PrestamoView.ConfirmarPrestamo(prestamo);
+                                ConsoleViews.MensajeExito("Préstamo realizado correctamente.");
                             }
                             else
                             {
-                                ConsoleViews.MensajeError("No se encontró ningún libro o usuario con los datos ingresados.");
+                                ConsoleViews.MensajeError("No se pudo realizar el préstamo. Verifique disponibilidad.");
                             }
                             break;
 
-                        case "5":
-                            ConsoleViews.Header("DEVOLVER UN LIBRO");
+                        case "5": // Devolver Libro
                             var prestamosActivos = biblioteca.ListarPrestamosActivos();
+                            var idPrestamoDevolver = PrestamoView.FormularioDevolucion(prestamosActivos);
 
-                            if (prestamosActivos.Count == 0)
+                            if (idPrestamoDevolver != null)
                             {
-                                ConsoleViews.MensajeAdvertencia("Actualmente no hay préstamos activos para devolver.");
-                            }
-                            else
-                            {
-                                Console.WriteLine("  Préstamos Activos:");
-                                // Mostramos una lista numerada del 1 en adelante
-                                for (int i = 0; i < prestamosActivos.Count; i++)
-                                {
-                                    Console.WriteLine($"  [{i + 1}] Libro: {prestamosActivos[i].Libro.Titulo} | Usuario: {prestamosActivos[i].Usuario.Nombre}");
-                                }
-
-                                int? indice = ConsoleViews.LeerEntero("\n  Seleccione el NÚMERO del préstamo que desea devolver");
-
-                                if (indice.HasValue && indice.Value > 0 && indice.Value <= prestamosActivos.Count)
-                                {
-                                    // Tomamos el préstamo correspondiente y usamos su ID internamente
-                                    var prestamoSeleccionado = prestamosActivos[indice.Value - 1];
-                                    bool exito = biblioteca.DevolverLibro(prestamoSeleccionado.Id);
-                                    if (exito)
-                                        ConsoleViews.MensajeExito($"El libro '{prestamoSeleccionado.Libro.Titulo}' ha sido devuelto correctamente.");
-                                    else
-                                        ConsoleViews.MensajeError("No se pudo procesar la devolución.");
-                                }
+                                bool exito = biblioteca.DevolverLibro(idPrestamoDevolver.Value);
+                                if (exito)
+                                    ConsoleViews.MensajeExito("El libro ha sido devuelto correctamente.");
                                 else
-                                {
-                                    ConsoleViews.MensajeError("Opción no válida.");
-                                }
+                                    ConsoleViews.MensajeError("Error al procesar la devolución.");
                             }
                             break;
 
-                        case "6":
-                            ConsoleViews.Header("DETALLE DE LIBRO");
-                            string tituloBusqueda = ConsoleViews.LeerTexto("Ingrese el Título del Libro a buscar");
-
-                            var libroEncontrado = biblioteca.Libros.FirstOrDefault(l => l.Titulo.ToLower().Contains(tituloBusqueda.ToLower()));
-
-                            if (libroEncontrado != null)
+                        case "6": // Detalle de Libro
+                            var libroDetalle = LibroView.FormularioSeleccionLibro(biblioteca.Libros);
+                            if (libroDetalle != null)
                             {
-                                Console.WriteLine($"\n  Título: {libroEncontrado.Titulo}");
-                                Console.WriteLine($"  Autor: {libroEncontrado.Autor}");
-                                Console.WriteLine($"  ISBN: {libroEncontrado.ISBN}");
-                                Console.WriteLine($"  Año: {libroEncontrado.AnioPublicacion}");
-                                Console.WriteLine($"  Disponible: {(libroEncontrado.HayDisponibilidad() ? "SÍ" : "NO")}");
+                                Console.Clear();
+                                ConsoleViews.Banner();
+                                LibroView.RenderizarDetalle(libroDetalle);
                             }
-                            else
-                                ConsoleViews.MensajeError("Libro no encontrado.");
                             break;
 
-                        case "7":
+                        case "7": // Salir
                             salir = true;
                             ConsoleViews.MensajeExito("Saliendo del sistema. ¡Hasta pronto!");
                             break;
@@ -174,7 +117,7 @@ namespace BibliotecaApp
                 }
                 catch (Exception ex)
                 {
-                    ConsoleViews.MensajeError($"Ocurrió un error en el sistema: {ex.Message}");
+                    ConsoleViews.MensajeError($"Ocurrió un error inesperado: {ex.Message}");
                 }
 
                 if (!salir)
@@ -182,6 +125,76 @@ namespace BibliotecaApp
                     ConsoleViews.EsperarTecla();
                 }
             }
+        }
+
+        /// <summary>
+        /// Carga de datos iniciales(2 Estudiantes, 1 Docente y 4 Libros).
+        /// </summary>
+
+        static void InicializarSeedData(Biblioteca biblioteca)
+        {
+            // Usuarios
+            biblioteca.RegistrarUsuario(new Estudiante(
+                nombre: "Maria Gonzalez Lopez",
+                identificacion: "04567890-1",
+                carne: "UDB-2022-001",
+                carrera: "Ingenieria en Sistemas Informaticos"
+            ));
+
+            biblioteca.RegistrarUsuario(new Estudiante(
+                nombre: "Carlos Martinez Rivas",
+                identificacion: "07891234-5",
+                carne: "UDB-2021-087",
+                carrera: "Licenciatura en Administracion de Empresas"
+            ));
+
+            biblioteca.RegistrarUsuario(new Docente(
+                nombre: "Dr. Roberto Mejia Fuentes",
+                identificacion: "01234567-8",
+                numeroEmpleado: "EMP-5023",
+                departamento: "Departamento de Ingenieria Informatica"
+            ));
+
+            // Libros
+            biblioteca.AgregarLibro(new LibroFisico(
+                titulo: "Introduccion a los Algoritmos",
+                autor: "Cormen, Leiserson, Rivest, Stein",
+                isbn: "978-0-262-03384-8",
+                anioPublicacion: 2009,
+                genero: "Ciencias de la Computacion",
+                stockTotal: 3,
+                ubicacionEstante: "Estante A-12"
+            ));
+
+            biblioteca.AgregarLibro(new LibroFisico(
+                titulo: "Clean Code",
+                autor: "Robert C. Martin",
+                isbn: "978-0-13-235088-4",
+                anioPublicacion: 2008,
+                genero: "Ingenieria de Software",
+                stockTotal: 2,
+                ubicacionEstante: "Estante B-07"
+            ));
+
+            biblioteca.AgregarLibro(new LibroFisico(
+                titulo: "Designing Data-Intensive Applications",
+                autor: "Martin Kleppmann",
+                isbn: "978-1-491-90308-1",
+                anioPublicacion: 2017,
+                genero: "Bases de Datos",
+                stockTotal: 4,
+                ubicacionEstante: "Estante C-03"
+            ));
+
+            biblioteca.AgregarLibro(new LibroFisico(
+                titulo: "Fundamentos de Bases de Datos",
+                autor: "Silberschatz, Korth, Sudarshan",
+                isbn: "978-0-07-352332-3",
+                anioPublicacion: 2019,
+                genero: "Bases de Datos",
+                stockTotal: 5,
+                ubicacionEstante: "Estante C-01"
+            ));
         }
     }
 }
