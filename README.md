@@ -7,7 +7,7 @@ Asignatura: Desarrollo de Programas Sección 01
 
 ## Descripción
 
-Aplicación de consola desarrollada en **C# (.NET 9)** que simula el sistema de gestión de préstamos de libros físicos de la Biblioteca UDB. Permite registrar usuarios (estudiantes y docentes), consultar el catálogo de libros, realizar préstamos y registrar devoluciones.
+Aplicación de consola desarrollada en **C# 13 (.NET 10.0)** que simula el sistema de gestión de préstamos de libros físicos de la Biblioteca UDB. Permite registrar usuarios (estudiantes y docentes), consultar el catálogo de libros, realizar préstamos y registrar devoluciones.
 
 El proyecto aplica **Programación Orientada a Objetos (POO)** avanzada, los principios **SOLID** y una arquitectura modular diseñada para escalar a una aplicación web **ASP.NET Core MVC** en la Fase 2.
 
@@ -18,36 +18,31 @@ El proyecto aplica **Programación Orientada a Objetos (POO)** avanzada, los pri
 | Tecnología | Versión | Uso |
 |---|---|---|
 | C# | 13 | Lenguaje principal |
-| .NET | 9 | Runtime y SDK |
+| .NET | 10.0 (`net10.0`) | Target Framework / Runtime |
+| IDE Recomendado | Visual Studio 2022 / VS Code | Entorno de desarrollo |
 | Almacenamiento | En memoria (`List<T>`) | Persistencia temporal (Fase 1) |
 
 ---
 
-## Instrucciones de instalación y ejecución
+## Instrucciones de ejecución
 
-### Requisitos previos
+### Opción 1: Visual Studio (Recomendado)
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) instalado
-- Cualquier terminal (PowerShell, CMD, bash)
+1. Abrir la carpeta del proyecto en **Visual Studio 2022**.
+2. Hacer doble clic en la solución `BibliotecaApp.slnx` o en el archivo de proyecto `BibliotecaApp.csproj`.
+3. Presionar **F5** (o la tecla `Ctrl + F5` / clic en el botón de **Iniciar / Run** en la barra superior) para compilar y ejecutar la aplicación de consola.
 
-### Clonar el repositorio
+---
 
-```bash
-git clone https://github.com/EduardoRamirez86/BibliotecaApp_CF1_DPS.git
-cd BibliotecaApp_CF1_DPS
-```
+### Opción 2: Desde la Terminal (.NET CLI)
 
-### Ejecutar la aplicación
+1. Abrir una terminal en la **raíz del proyecto** (donde está ubicado `BibliotecaApp.csproj`).
+   > ⚠️ **Nota:** No intentes ejecutar `dotnet run` dentro de subcarpetas como `/Services` o `/Models`, ya que fallará al no encontrar el archivo de proyecto `.csproj`.
 
-```bash
-dotnet run
-```
-
-### Compilar sin ejecutar
-
-```bash
-dotnet build
-```
+2. Ejecutar el siguiente comando:
+   ```bash
+   dotnet run
+   ```
 
 ---
 
