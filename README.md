@@ -24,25 +24,18 @@ El proyecto aplica **Programación Orientada a Objetos (POO)** avanzada, los pri
 
 ---
 
-## Instrucciones de ejecución
+## Instalación y ejecución
 
-### Opción 1: Visual Studio (Recomendado)
+### 1. Clonar el repositorio
 
-1. Abrir la carpeta del proyecto en **Visual Studio 2022**.
-2. Hacer doble clic en la solución `BibliotecaApp.slnx` o en el archivo de proyecto `BibliotecaApp.csproj`.
-3. Presionar **F5** (o la tecla `Ctrl + F5` / clic en el botón de **Iniciar / Run** en la barra superior) para compilar y ejecutar la aplicación de consola.
+```bash
+git clone https://github.com/EduardoRamirez86/BibliotecaApp_CF1_DPS.git
+```
 
----
+### 2. Abrir y ejecutar en Visual Studio
 
-### Opción 2: Desde la Terminal (.NET CLI)
-
-1. Abrir una terminal en la **raíz del proyecto** (donde está ubicado `BibliotecaApp.csproj`).
-   > ⚠️ **Nota:** No intentes ejecutar `dotnet run` dentro de subcarpetas como `/Services` o `/Models`, ya que fallará al no encontrar el archivo de proyecto `.csproj`.
-
-2. Ejecutar el siguiente comando:
-   ```bash
-   dotnet run
-   ```
+1. Abrir la solución `BibliotecaApp.slnx` o el archivo de proyecto `BibliotecaApp.csproj` en **Visual Studio 2022**.
+2. Presionar **F5** (o `Ctrl + F5` / clic en el botón de **Iniciar**) para compilar y ejecutar la aplicación.
 
 ---
 
