@@ -13,6 +13,17 @@ El proyecto aplica **Programación Orientada a Objetos (POO)** avanzada, los pri
 
 ---
 
+## Integrantes del equipo
+
+| # | Apellidos | Nombres | Carné |
+|---|---|---|---|
+| 1 | Ruiz Hernández | Edgar Antonio | RH201851 |
+| 2 | Henriquez Vasquez | Axel Francisco | HV230423 |
+| 3 | Varela Linares | Marjorie Daniela | VL261354 |
+| 4 | Ramirez Torres | Eduardo Alfredo | RT240549 |
+| 5 | Azucena Ayala | Carlos Josue | AA260854 |
+| 6 | Ayala Palacios | Marcos Ezequiel | AP260351 |
+
 ## Tecnologías utilizadas
 
 | Tecnología | Versión | Uso |
@@ -97,13 +108,4 @@ BibliotecaApp_CF1_DPS/
 
 ---
 
-## Integrantes del equipo
 
-| # | Apellidos | Nombres | Carné |
-|---|---|---|---|
-| 1 | Ruiz Hernández | Edgar Antonio | RH201851 |
-| 2 | Henriquez Vasquez | Axel Francisco | HV230423 |
-| 3 | Varela Linares | Marjorie Daniela | VL261354 |
-| 4 | Ramirez Torres | Eduardo Alfredo | RT240549 |
-| 5 | Azucena Ayala | Carlos Josue | AA260854 |
-| 6 | Ayala Palacios | Marcos Ezequiel | AP260351 |
