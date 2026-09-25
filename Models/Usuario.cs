@@ -1,3 +1,5 @@
+using System;
+
 namespace BibliotecaApp.Models;
 
 /// <summary>
@@ -6,8 +8,11 @@ namespace BibliotecaApp.Models;
 /// </summary>
 public abstract class Usuario : EntidadBase
 {
-    public string Nombre { get; protected set; }
-    public string Identificacion { get; protected set; }
+    public string Nombre { get; protected set; } = null!;
+    public string Identificacion { get; protected set; } = null!;
+
+
+    protected Usuario() { }
 
     protected Usuario(string nombre, string identificacion)
     {
