@@ -1,3 +1,5 @@
+using System;
+
 namespace BibliotecaApp.Models;
 
 /// <summary>
@@ -6,10 +8,13 @@ namespace BibliotecaApp.Models;
 /// </summary>
 public sealed class LibroFisico : Libro
 {
-    public int StockTotal { get; private set; }
-    public int StockPrestado { get; private set; }
-    public string UbicacionEstante { get; private set; }
+    public int StockTotal { get; private set; } = 0;
+    public int StockPrestado { get; private set; } = 0;
+    public string UbicacionEstante { get; private set; } = null!;
     public int StockDisponible => StockTotal - StockPrestado;
+
+    // --- Constructor vacío requerido por Entity Framework Core ---
+    private LibroFisico() { }
 
     public LibroFisico(
         string titulo, string autor, string isbn,

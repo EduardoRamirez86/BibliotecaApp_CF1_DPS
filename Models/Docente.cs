@@ -1,10 +1,14 @@
+using System;
+
 namespace BibliotecaApp.Models;
 
 /// <summary>Docente de la UDB. Extiende Usuario con NumeroEmpleado y Departamento.</summary>
 public sealed class Docente : Usuario
 {
-    public string NumeroEmpleado { get; private set; }
-    public string Departamento { get; private set; }
+    public string NumeroEmpleado { get; private set; } = null!;
+    public string Departamento { get; private set; } = null!;
+
+    private Docente() { }
 
     public Docente(string nombre, string identificacion, string numeroEmpleado, string departamento)
         : base(nombre, identificacion)

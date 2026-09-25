@@ -1,15 +1,14 @@
-using BibliotecaApp.Models;
+using System;
 
 namespace BibliotecaApp.Models;
 
 /// <summary>
 /// Registra la relación entre un Usuario y un Libro durante un período de tiempo.
-/// FechaDevolucionReal es nullable: null = préstamo activo, fecha = devuelto.
 /// </summary>
 public sealed class Prestamo : EntidadBase
 {
-    public Usuario Usuario { get; private set; }
-    public Libro Libro { get; private set; }
+    public Usuario Usuario { get; private set; } = null!;
+    public Libro Libro { get; private set; } = null!;
     public DateTime FechaPrestamo { get; private set; }
     public DateTime FechaDevolucionEsperada { get; private set; }
 
@@ -19,10 +18,13 @@ public sealed class Prestamo : EntidadBase
     public bool EstaActivo => FechaDevolucionReal is null;
     public bool EstaVencido => EstaActivo && DateTime.Now > FechaDevolucionEsperada;
 
+    // --- Constructor vacío para EF Core ---
+    private Prestamo() { }
+
     public Prestamo(Usuario usuario, Libro libro, int diasPrestamo = 15)
     {
         Usuario = usuario ?? throw new ArgumentNullException(nameof(usuario));
-        Libro   = libro   ?? throw new ArgumentNullException(nameof(libro));
+        Libro = libro ?? throw new ArgumentNullException(nameof(libro));
 
         if (diasPrestamo <= 0)
             throw new ArgumentOutOfRangeException(nameof(diasPrestamo),
@@ -33,9 +35,6 @@ public sealed class Prestamo : EntidadBase
         FechaDevolucionReal = null;
     }
 
-    /// <summary>
-    /// Marca el préstamo como devuelto. Lanza InvalidOperationException si ya fue devuelto.
-    /// </summary>
     public void RegistrarDevolucion()
     {
         if (!EstaActivo)
