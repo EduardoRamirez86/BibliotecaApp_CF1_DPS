@@ -1,0 +1,13 @@
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Acceso Denegado";
+}
+
+<div class="auth-header">
+    <h1 class="auth-title" style="color: var(--udb-danger);">Acceso Denegado</h1>
+    <p class="auth-subtitle-gray">No tienes los permisos requeridos para acceder a este recurso.</p>
+</div>
+
+<div class="auth-footer" style="margin-top: 30px;">
+    <a asp-controller="Home" asp-action="Index" class="btn-primary-udb" style="display: inline-block; text-decoration: none; padding: 12px 24px;">Volver al Inicio</a>
+</div>

@@ -1,0 +1,91 @@
+@model RegisterDto
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Crear Cuenta";
+}
+
+<!-- Encabezado Fiel al Mockup 2: Crear Cuenta -->
+<div class="auth-header">
+    <h1 class="auth-title">Crear Cuenta</h1>
+    <p class="auth-subtitle-gray">Regístrate en el Sistema de Gestión de Préstamos</p>
+</div>
+
+<!-- Errores de Validación -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <div asp-validation-summary="All"></div>
+    </div>
+}
+
+<form asp-controller="Auth" asp-action="Register" method="post" class="auth-form" novalidate>
+    @Html.AntiForgeryToken()
+
+    <!-- Nombre Completo -->
+    <div class="form-group">
+        <label asp-for="NombreCompleto" class="form-label"></label>
+        <div class="input-wrapper">
+            <input asp-for="NombreCompleto" class="form-control" placeholder="Ej. Juan Pérez" autofocus />
+        </div>
+        <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+    </div>
+
+    <!-- Correo Electrónico -->
+    <div class="form-group">
+        <label asp-for="Email" class="form-label"></label>
+        <div class="input-wrapper">
+            <input asp-for="Email" class="form-control" placeholder="nombre.usuario@udb.edu.sv" />
+        </div>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <!-- Rol en la Institución (Estudiante, Docente, Bibliotecario) -->
+    <div class="form-group">
+        <label asp-for="Rol" class="form-label">Tipo de Usuario</label>
+        <div class="input-wrapper">
+            <select asp-for="Rol" class="form-control">
+                <option value="@RolUsuario.Estudiante">Estudiante</option>
+                <option value="@RolUsuario.Docente">Docente</option>
+                <option value="@RolUsuario.Bibliotecario">Bibliotecario (Gestor de Biblioteca)</option>
+            </select>
+        </div>
+        <span asp-validation-for="Rol" class="text-danger"></span>
+    </div>
+
+    <!-- Contraseña -->
+    <div class="form-group">
+        <label asp-for="Password" class="form-label"></label>
+        <div class="input-wrapper">
+            <input asp-for="Password" type="password" id="regPassword" class="form-control input-password" placeholder="Mínimo 8 caracteres" />
+            <button type="button" class="password-toggle-btn" onclick="togglePassword('regPassword', this)" title="Mostrar u ocultar contraseña">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <!-- Confirmar Contraseña -->
+    <div class="form-group">
+        <label asp-for="ConfirmarPassword" class="form-label"></label>
+        <div class="input-wrapper">
+            <input asp-for="ConfirmarPassword" type="password" id="regConfirmPassword" class="form-control input-password" placeholder="Repite tu contraseña" />
+            <button type="button" class="password-toggle-btn" onclick="togglePassword('regConfirmPassword', this)" title="Mostrar u ocultar contraseña">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+        <span asp-validation-for="ConfirmarPassword" class="text-danger"></span>
+    </div>
+
+    <!-- Botón Registrarse -->
+    <button type="submit" class="btn-primary-udb">Registrarse</button>
+</form>
+
+<div class="auth-footer">
+    ¿Ya tienes cuenta? <a asp-controller="Auth" asp-action="Login">Inicia sesión aquí</a>
+</div>

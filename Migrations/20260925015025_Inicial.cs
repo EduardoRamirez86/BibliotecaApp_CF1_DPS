@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -39,11 +39,15 @@ namespace BibliotecaApp.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Identificacion = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TipoUsuario = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false, defaultValue: ""),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false, defaultValue: ""),
+                    Rol = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
+                    TipoUsuario = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     NumeroEmpleado = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Departamento = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Carne = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Carrera = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CodigoPersonal = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>

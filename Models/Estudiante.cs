@@ -1,12 +1,13 @@
 using System;
+using BibliotecaApp.Enums;
 
 namespace BibliotecaApp.Models;
 
 /// <summary>Estudiante de la UDB. Extiende Usuario con Carné y Carrera.</summary>
 public sealed class Estudiante : Usuario
 {
-    public string Carne { get; private set; } = null!;
-    public string Carrera { get; private set; } = null!;
+    public string Carne { get; private set; } = string.Empty;
+    public string Carrera { get; private set; } = string.Empty;
 
     private Estudiante() { }
 
@@ -18,6 +19,14 @@ public sealed class Estudiante : Usuario
         if (string.IsNullOrWhiteSpace(carrera))
             throw new ArgumentException("La carrera no puede estar vacía.", nameof(carrera));
 
+        Carne = carne;
+        Carrera = carrera;
+        Rol = RolUsuario.Estudiante;
+    }
+
+    public Estudiante(string nombre, string identificacion, string email, string passwordHash, string carne = "", string carrera = "")
+        : base(nombre, identificacion, email, passwordHash, RolUsuario.Estudiante)
+    {
         Carne = carne;
         Carrera = carrera;
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -18,6 +18,7 @@ namespace BibliotecaApp.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Estudiante> Estudiantes { get; set; }
         public DbSet<Docente> Docentes { get; set; }
+        public DbSet<Bibliotecario> Bibliotecarios { get; set; }
         public DbSet<Libro> Libros { get; set; }
         public DbSet<LibroFisico> LibrosFisicos { get; set; }
         public DbSet<Prestamo> Prestamos { get; set; }
@@ -26,11 +27,12 @@ namespace BibliotecaApp.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Aquí configuramos la herencia para que Estudiantes y Docentes convivan en la misma tabla "Usuarios" pero se diferencien por una columna.
+            // Aquí configuramos la herencia para que Estudiantes, Docentes y Bibliotecarios convivan en la misma tabla "Usuarios" pero se diferencien por una columna.
             modelBuilder.Entity<Usuario>()
                 .HasDiscriminator<string>("TipoUsuario")
                 .HasValue<Estudiante>("Estudiante")
-                .HasValue<Docente>("Docente");
+                .HasValue<Docente>("Docente")
+                .HasValue<Bibliotecario>("Bibliotecario");
 
             modelBuilder.Entity<Libro>()
                 .HasDiscriminator<string>("TipoLibro")

@@ -1,15 +1,7 @@
 # Sistema de Gestión de Biblioteca — BibliotecaApp
 
-Proyecto de Cátedra · Fase 1 · Universidad Don Bosco (UDB)  
+Proyecto de Cátedra · Universidad Don Bosco (UDB)  
 Asignatura: Desarrollo de Programas Sección 01
-
----
-
-## Descripción
-
-Aplicación de consola desarrollada en **C# 13 (.NET 10.0)** que simula el sistema de gestión de préstamos de libros físicos de la Biblioteca UDB. Permite registrar usuarios (estudiantes y docentes), consultar el catálogo de libros, realizar préstamos y registrar devoluciones.
-
-El proyecto aplica **Programación Orientada a Objetos (POO)** avanzada, los principios **SOLID** y una arquitectura modular diseñada para escalar a una aplicación web **ASP.NET Core MVC** en la Fase 2.
 
 ---
 
@@ -24,88 +16,85 @@ El proyecto aplica **Programación Orientada a Objetos (POO)** avanzada, los pri
 | 5 | Azucena Ayala | Carlos Josue | AA260854 |
 | 6 | Ayala Palacios | Marcos Ezequiel | AP260351 |
 
-## Tecnologías utilizadas
+---
+
+## Descripción General
+
+Aplicación Web desarrollada en **ASP.NET Core MVC (.NET 10.0)** con **Entity Framework Core** y **SQL Server**. El proyecto implementa una arquitectura en capas (N-Layer / MVC) con principios **SOLID**, inyección de dependencias y componentes reutilizables.
+
+Actualmente se encuentra implementado y verificado el **Módulo de Seguridad y Autenticación**:
+- **Inicio de Sesión (Login)**: Pantalla fiel a los lineamientos institucionales UDB con correo institucional (`@udb.edu.sv`), toggle interactivo para visibilidad de contraseña y opción "Recordarme".
+- **Registro de Usuarios (Register)**: Alta de usuarios con validaciones de contraseñas seguras (mínimo 8 caracteres, confirmación coincidente) y asignación de roles.
+- **Roles del Sistema**:
+  - `Estudiante`: Alumno de la institución.
+  - `Docente`: Profesor o académico.
+  - `Bibliotecario`: Personal administrativo y gestor del sistema bibliotecario.
+- **Seguridad Criptográfica**: Cifrado y verificación de contraseñas mediante **PBKDF2/SHA256** con salt criptográfica aleatoria de 128 bits e iteraciones de seguridad (100,000 iteraciones).
+- **Manejo de Sesión**: Autenticación nativa basada en **Cookies** (`CookieAuthenticationDefaults`).
+- **Página de Bienvenida (Post-Login)**: Redirección inmediata a `Home/Index` que despliega una confirmación ("¡Hola Mundo!"), el usuario autenticado, su rol activo y opción de cierre de sesión.
+
+---
+
+## Tecnologías Utilizadas
 
 | Tecnología | Versión | Uso |
 |---|---|---|
 | C# | 13 | Lenguaje principal |
-| .NET | 10.0 (`net10.0`) | Target Framework / Runtime |
-| IDE Recomendado | Visual Studio 2022 / VS Code | Entorno de desarrollo |
-| Almacenamiento | En memoria (`List<T>`) | Persistencia temporal (Fase 1) |
+| .NET SDK | 10.0 (`net10.0`) | Framework de ejecución |
+| ASP.NET Core MVC | 10.0 | Arquitectura web y controladores |
+| Entity Framework Core | 10.0.12 | ORM y mapeo relacional TPH |
+| SQL Server | Express / LocalDB | Motor de base de datos |
+| Criptografía | PBKDF2 (SHA256) | Hashing seguro de credenciales |
 
 ---
 
-## Instalación y ejecución
+## Cómo Ejecutar el Proyecto
 
 ### 1. Clonar el repositorio
-
 ```bash
 git clone https://github.com/EduardoRamirez86/BibliotecaApp_CF1_DPS.git
+cd BibliotecaApp_CF1_DPS
 ```
 
-### 2. Abrir y ejecutar en Visual Studio
-
-1. Abrir la solución `BibliotecaApp.slnx` o el archivo de proyecto `BibliotecaApp.csproj` en **Visual Studio 2022**.
-2. Presionar **F5** (o `Ctrl + F5` / clic en el botón de **Iniciar**) para compilar y ejecutar la aplicación.
-
----
-
-## Estructura del proyecto
-
-```
-BibliotecaApp_CF1_DPS/
-│
-├── Program.cs                  # Punto de entrada. Configura servicios, seed data y bucle principal.
-│
-├── Models/                     # Entidades del dominio (POO: Herencia, Abstracción, Encapsulamiento)
-│   ├── EntidadBase.cs          # Clase abstracta base: genera Id (GUID) y FechaCreacion automáticamente.
-│   ├── Libro.cs                # Clase abstracta Libro: define la estructura común de cualquier libro.
-│   ├── LibroFisico.cs          # Libro físico con stock en estante. Controla préstamos y devoluciones.
-│   ├── Usuario.cs              # Clase abstracta Usuario: base para Estudiante y Docente.
-│   ├── Estudiante.cs           # Usuario de tipo estudiante. Agrega Carné y Carrera.
-│   ├── Docente.cs              # Usuario de tipo docente. Agrega NumeroEmpleado y Departamento.
-│   └── Prestamo.cs             # Relación entre Usuario y Libro en un período de tiempo determinado.
-│
-├── Interfaces/                 # Contratos abstractos (SOLID: DIP — la UI depende de interfaces, no de clases concretas)
-│   ├── IBuscable.cs            # Interfaz genérica de búsqueda por texto. Implementada por los servicios.
-│   ├── ILibroService.cs        # Contrato del servicio de libros: obtener, agregar, buscar.
-│   ├── IUsuarioService.cs      # Contrato del servicio de usuarios: registrar, buscar, verificar.
-│   └── IPrestamoService.cs     # Contrato del servicio de préstamos: crear, devolver, consultar.
-│
-├── Services/                   # Lógica de negocio con almacenamiento en memoria
-│   ├── LibroService.cs         # Gestiona el catálogo de libros. Implementa ILibroService.
-│   ├── UsuarioService.cs       # Gestiona el registro de usuarios. Implementa IUsuarioService.
-│   └── PrestamoService.cs      # Orquesta préstamos y devoluciones. Implementa IPrestamoService.
-│
-└── UI/                         # Capa de presentación para la consola (SOLID: SRP — solo renderiza)
-    ├── ConsoleViews.cs         # Componentes reutilizables: banner, headers, badges, inputs, mensajes.
-    ├── LibroView.cs            # Vistas de catálogo, detalle y selección de libros.
-    ├── UsuarioView.cs          # Vistas de lista, registro y selección de usuarios.
-    └── PrestamoView.cs         # Vistas de registro de préstamos, devoluciones y confirmaciones.
+### 2. Configurar la Cadena de Conexión (si aplica)
+Revisar `appsettings.json` para verificar la cadena de conexión hacia tu instancia de SQL Server:
+```json
+{
+  "ConnectionStrings": {
+    "ConexionSQL": "Server=localhost;Database=BibliotecaUDB_DPS;Trusted_Connection=True;TrustServerCertificate=True;"
+  }
+}
 ```
 
----
+### 3. Aplicar Migraciones a la Base de Datos (opcional)
+Si se desea sincronizar la base de datos con las tablas:
+```bash
+dotnet ef database update
+```
 
-## Funcionalidades principales
+### 4. Compilar y Ejecutar la Aplicación
 
-- **Catálogo de libros** — Listado de todos los libros físicos con disponibilidad en tiempo real.
-- **Gestión de usuarios** — Registro y consulta de estudiantes y docentes de la UDB.
-- **Préstamo de libros** — Valida disponibilidad de stock y registra el préstamo con fecha de devolución esperada (15 días).
-- **Devolución de libros** — Lista préstamos activos, registra la devolución y libera el stock.
-- **Detalle de libro** — Búsqueda por texto y ficha completa con información del ejemplar.
+#### Opción A: Desde Terminal / Consola
+```bash
+dotnet run
+```
+Abre tu navegador en la URL indicada en la consola (usualmente `https://localhost:7xxx` o `http://localhost:5xxx`). La aplicación abrirá directamente la pantalla de **Iniciar Sesión**.
 
----
-
-## Principios SOLID aplicados
-
-| Principio | Aplicación en el proyecto |
-|---|---|
-| **S** — Single Responsibility | Cada clase tiene una única razón de cambio (Services vs UI vs Models). |
-| **O** — Open/Closed | Se pueden agregar nuevos tipos de libro sin modificar los servicios existentes. |
-| **L** — Liskov Substitution | `LibroFisico` puede usarse en cualquier lugar donde se espera un `Libro`. |
-| **I** — Interface Segregation | `IBuscable<T>` es una interfaz específica, no un contrato monolítico. |
-| **D** — Dependency Inversion | `Program.cs` declara los servicios con sus interfaces (`ILibroService`, etc.). |
+#### Opción B: Desde Visual Studio 2022
+1. Abrir la solución `BibliotecaApp.slnx` o el archivo `BibliotecaApp.csproj`.
+2. Presionar **F5** o `Ctrl + F5` para iniciar.
 
 ---
 
+## Flujo de Prueba del Módulo de Seguridad
 
+1. **Pantalla inicial:** El navegador se redirige automáticamente a `/Auth/Login`.
+2. **Crear una cuenta:** Haz clic en *"¿No tienes cuenta? Regístrate aquí"*.
+3. **Completar el registro:**
+   - Nombre: `Eduardo Ramírez`
+   - Correo: `eduardo.ramirez@udb.edu.sv`
+   - Rol: Selecciona `Estudiante`, `Docente` o `Bibliotecario`.
+   - Contraseña: (mínimo 8 caracteres, ej. `Prueba1234!`).
+   - Prueba el botón del ojo para verificar o esconder la contraseña.
+4. **Iniciar Sesión:** Ingresa con el correo y contraseña registrados.
+5. **Verificación:** Accederás a la pantalla de bienvenida con el *"¡Hola Mundo!"*, tu rol asignado y el botón de *"Cerrar Sesión"*.

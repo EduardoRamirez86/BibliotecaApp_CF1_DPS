@@ -1,0 +1,64 @@
+@model LoginDto
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<!-- Encabezado con Logo UDB, Título y Subtítulo Dorado -->
+<partial name="_AuthHeader" model='("BIBLIOTECA UDB", "Sistema de Gestión de Préstamos", true)' />
+
+<!-- Mensajes de Éxito o Errores de Validación -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <span>✓ @TempData["SuccessMessage"]</span>
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <div asp-validation-summary="All"></div>
+    </div>
+}
+
+<form asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="auth-form" novalidate>
+    @Html.AntiForgeryToken()
+
+    <!-- Campo: Correo Electrónico -->
+    <div class="form-group">
+        <label asp-for="Email" class="form-label"></label>
+        <div class="input-wrapper">
+            <input asp-for="Email" class="form-control" placeholder="nombre.usuario@udb.edu.sv" autofocus />
+        </div>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <!-- Campo: Contraseña con Toggle de Ojo -->
+    <div class="form-group">
+        <label asp-for="Password" class="form-label"></label>
+        <div class="input-wrapper">
+            <input asp-for="Password" type="password" id="loginPassword" class="form-control input-password" placeholder="••••••••" />
+            <button type="button" class="password-toggle-btn" onclick="togglePassword('loginPassword', this)" title="Mostrar u ocultar contraseña">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            </button>
+        </div>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <!-- Opción: Recordarme -->
+    <label class="form-check">
+        <input asp-for="Recordarme" type="checkbox" />
+        <span>Recordar mi sesión en este equipo</span>
+    </label>
+
+    <!-- Botón de Inicio de Sesión -->
+    <button type="submit" class="btn-primary-udb">Iniciar Sesión</button>
+</form>
+
+<div class="auth-footer">
+    ¿No tienes cuenta? <a asp-controller="Auth" asp-action="Register">Regístrate aquí</a>
+</div>

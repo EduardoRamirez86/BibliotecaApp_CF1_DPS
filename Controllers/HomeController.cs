@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BibliotecaApp.Controllers
+namespace BibliotecaApp.Controllers;
+
+[Authorize]
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            // Esto le dice a MVC que busque un archivo HTML (Vista) llamado Index.cshtml
-            return View();
-        }
+        ViewBag.NombreUsuario = User.Identity?.Name ?? "Usuario";
+        ViewBag.RolUsuario = User.FindFirst(ClaimTypes.Role)?.Value ?? "Sin Rol";
+        ViewBag.EmailUsuario = User.FindFirst(ClaimTypes.Email)?.Value ?? "";
+
+        return View();
     }
 }
