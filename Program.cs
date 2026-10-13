@@ -77,6 +77,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Codigo necesario para poder mapear las rutas de la web API
+app.MapControllers();
+
 // Por defecto abrimos la pantalla de Login
 app.MapControllerRoute(
     name: "default",
