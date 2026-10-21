@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Habilita la arquitectura MVC
 builder.Services.AddControllersWithViews();
 
-// Configuración de Base de Datos con Resiliencia ante fallos transitorios
+// Configuración de Base de Datos
 builder.Services.AddDbContext<BibliotecaDbContext>(options =>
 {
     options.UseSqlServer(
@@ -27,7 +27,7 @@ builder.Services.AddScoped<ILibroService, LibroService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IPrestamoService, PrestamoService>();
 
-// Configuración de Autenticación por Cookies (Nativo de ASP.NET Core)
+// Configuración de Autenticación por Cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -40,9 +40,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
+builder.Services.AddScoped<BibliotecaApp.Services.LibroService>();
+builder.Services.AddScoped<BibliotecaApp.Services.PrestamoService>();
+
 var app = builder.Build();
 
-// Creación automática de base de datos, aplicación de migraciones y siembra inicial (Seed Data)
+// Creación automática de base de datos
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
