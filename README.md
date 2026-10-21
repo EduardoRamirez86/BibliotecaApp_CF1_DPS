@@ -31,8 +31,13 @@ Actualmente se encuentra implementado y verificado el **Módulo de Seguridad y A
   - `Bibliotecario`: Personal administrativo y gestor del sistema bibliotecario.
 - **Seguridad Criptográfica**: Cifrado y verificación de contraseñas mediante **PBKDF2/SHA256** con salt criptográfica aleatoria de 128 bits e iteraciones de seguridad (100,000 iteraciones).
 - **Manejo de Sesión**: Autenticación nativa basada en **Cookies** (`CookieAuthenticationDefaults`).
-- **Página de Bienvenida (Post-Login)**: Redirección inmediata a `Home/Index` que despliega una confirmación ("¡Hola Mundo!"), el usuario autenticado, su rol activo y opción de cierre de sesión.
 
+###  Módulo de Catálogo y Préstamos (Fase 2)
+- **Catálogo Dinámico (MVC):** Vistas interactivas diseñadas con Bootstrap e integradas al backend para la visualización del inventario literario en tiempo real.
+- **Gestión Automática de Inventario:** Lógica conectada a Entity Framework Core que descuenta automáticamente el stock disponible al momento de confirmar un préstamo.
+- **Validación de Reglas de Negocio:** Prevención de duplicidad (un usuario no puede tener dos préstamos activos del mismo ejemplar) y validación estricta de stock (bloqueo de solicitudes para libros agotados).
+- **Historial y Devoluciones:** Panel de usuario ("Mis Préstamos") para monitorear el estado de los ejemplares prestados y registrar devoluciones, restaurando automáticamente la disponibilidad en SQL Server.
+- **API RESTful:** Endpoints configurados en `LibrosApiController` para consultas externas y futuras integraciones.
 ---
 
 ## Tecnologías Utilizadas
