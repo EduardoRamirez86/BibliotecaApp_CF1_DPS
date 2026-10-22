@@ -1,57 +1,51 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
-using BibliotecaApp.Interfaces;
-using BibliotecaApp.Data;
 using System;
-using System.Linq;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using BibliotecaApp.Interfaces;
 
 namespace BibliotecaApp.Controllers
 {
+    /// <summary>
+    /// Controlador MVC delgado (Thin Controller) para la interacción del usuario con préstamos y devoluciones.
+    /// Delega el 100% de la persistencia y reglas de negocio a IPrestamoService.
+    /// </summary>
     [Authorize]
     public class PrestamoController : Controller
     {
         private readonly IPrestamoService _prestamoService;
-        private readonly BibliotecaDbContext _context;
 
-        public PrestamoController(IPrestamoService prestamoService, BibliotecaDbContext context)
+        public PrestamoController(IPrestamoService prestamoService)
         {
             _prestamoService = prestamoService;
-            _context = context;
         }
 
-        private Models.Usuario? ObtenerUsuarioAutenticado()
-        {
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? User.Identity?.Name;
-            return _context.Usuarios.FirstOrDefault(u => u.Email == email!);
-        }
-
+        [HttpGet]
         public IActionResult Index()
         {
-            var usuario = ObtenerUsuarioAutenticado();
+            var email = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
-            // Si por alguna razón la sesión es inválida, lo mandamos al login
-            if (usuario == null) return RedirectToAction("Login", "Auth");
-
-            var prestamos = _prestamoService.ObtenerPrestamosPorUsuario(usuario.Id);
+            var prestamos = _prestamoService.ObtenerPrestamosPorEmail(email);
             return View(prestamos);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Solicitar(Guid idLibro)
         {
-            var usuario = ObtenerUsuarioAutenticado();
-            var libro = _context.LibrosFisicos.FirstOrDefault(l => l.Id == idLibro);
-
-            if (usuario == null || libro == null)
+            var email = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name;
+            if (string.IsNullOrEmpty(email))
             {
-                TempData["Error"] = "No se pudo procesar la solicitud. Verifique su sesión y la disponibilidad del libro.";
-                return RedirectToAction("Detalle", "Libro", new { id = idLibro });
+                return RedirectToAction("Login", "Auth");
             }
 
             try
             {
-                _prestamoService.CrearPrestamo(usuario, libro);
+                _prestamoService.CrearPrestamoPorEmail(email, idLibro);
                 TempData["Mensaje"] = "¡Préstamo registrado con éxito!";
             }
             catch (Exception ex)
@@ -63,6 +57,7 @@ namespace BibliotecaApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Devolver(Guid idPrestamo)
         {
             try
@@ -75,7 +70,7 @@ namespace BibliotecaApp.Controllers
                 TempData["Error"] = "Error al devolver el libro: " + ex.Message;
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 }

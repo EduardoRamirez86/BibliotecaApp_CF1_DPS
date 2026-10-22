@@ -1,0 +1,80 @@
+@model BibliotecaApp.DTOs.Libros.LibroFormDto
+
+@{
+    ViewData["Title"] = "Registrar Nuevo Libro";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow border-0 rounded-4 overflow-hidden bg-light">
+                <div class="card-header text-center py-3 text-white" style="background-color: #003366;">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-journal-plus me-2"></i> Registrar Nuevo Ejemplar al Catálogo</h4>
+                </div>
+                <div class="card-body p-4 p-md-5 bg-white">
+                    <form asp-controller="Libro" asp-action="Crear" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label asp-for="Titulo" class="form-label fw-bold text-dark"></label>
+                                <input asp-for="Titulo" class="form-control form-control-lg rounded-3" placeholder="Ej. Clean Code: Manual de desarrollo ágil" />
+                                <span asp-validation-for="Titulo" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Autor" class="form-label fw-bold text-dark"></label>
+                                <input asp-for="Autor" class="form-control form-control-lg rounded-3" placeholder="Ej. Robert C. Martin" />
+                                <span asp-validation-for="Autor" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="ISBN" class="form-label fw-bold text-dark"></label>
+                                <input asp-for="ISBN" class="form-control form-control-lg rounded-3" placeholder="Ej. 978-0-13-235088-4" />
+                                <span asp-validation-for="ISBN" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Genero" class="form-label fw-bold text-dark"></label>
+                                <input asp-for="Genero" class="form-control form-control-lg rounded-3" placeholder="Ej. Ingeniería de Software" />
+                                <span asp-validation-for="Genero" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="AnioPublicacion" class="form-label fw-bold text-dark"></label>
+                                <input asp-for="AnioPublicacion" type="number" class="form-control form-control-lg rounded-3" />
+                                <span asp-validation-for="AnioPublicacion" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="StockTotal" class="form-label fw-bold text-dark"></label>
+                                <input asp-for="StockTotal" type="number" min="1" class="form-control form-control-lg rounded-3" />
+                                <span asp-validation-for="StockTotal" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="UbicacionEstante" class="form-label fw-bold text-dark"></label>
+                                <input asp-for="UbicacionEstante" class="form-control form-control-lg rounded-3" placeholder="Ej. Estante B-04" />
+                                <span asp-validation-for="UbicacionEstante" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 text-muted" />
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a asp-action="Index" class="btn btn-outline-secondary fw-bold rounded-3 px-4 py-2">
+                                <i class="bi bi-arrow-left me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn text-white fw-bold rounded-3 px-4 py-2" style="background-color: #003366;">
+                                <i class="bi bi-check-circle me-1"></i> Guardar Libro
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
