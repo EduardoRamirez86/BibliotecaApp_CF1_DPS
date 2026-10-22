@@ -1,36 +1,40 @@
+using System;
+using System.Collections.Generic;
+using BibliotecaApp.DTOs.Prestamos;
 using BibliotecaApp.Models;
 
 namespace BibliotecaApp.Interfaces;
 
 /// <summary>
-/// Contrato del servicio de préstamos.
-/// Principio SOLID: DIP — desacopla la lógica de préstamos de su consumidor (la UI).
+/// Contrato del servicio de préstamos y devoluciones.
+/// Centraliza la orquestación de usuarios, inventario de libros y reglas de negocio.
 /// </summary>
 public interface IPrestamoService
 {
     /// <summary>Devuelve todos los préstamos (activos e históricos).</summary>
     IReadOnlyList<Prestamo> ObtenerTodos();
 
+    /// <summary>Devuelve la lista completa de préstamos proyectada a DTO seguro.</summary>
+    IReadOnlyList<PrestamoDetalleDto> ObtenerResumenTodos();
+
     /// <summary>Devuelve solo los préstamos activos (no devueltos aún).</summary>
     IEnumerable<Prestamo> ObtenerActivos();
 
-    /// <summary>
-    /// Crea un nuevo préstamo, validando disponibilidad del libro.
-    /// </summary>
-    /// <param name="usuario">Usuario que realiza el préstamo.</param>
-    /// <param name="libro">Libro que se desea prestar.</param>
-    /// <returns>El objeto Prestamo recién creado.</returns>
+    /// <summary>Obtiene los préstamos de un usuario específico por su Id.</summary>
+    IEnumerable<Prestamo> ObtenerPrestamosPorUsuario(Guid usuarioId);
+
+    /// <summary>Obtiene los préstamos de un usuario específico por su correo institucional.</summary>
+    IEnumerable<Prestamo> ObtenerPrestamosPorEmail(string email);
+
+    /// <summary>Crea un nuevo préstamo entre un usuario y libro ya instanciados.</summary>
     Prestamo CrearPrestamo(Usuario usuario, Libro libro);
 
-    /// <summary>
-    /// Registra la devolución del préstamo con el Id dado.
-    /// </summary>
-    /// <param name="prestamoId">Id del préstamo a devolver.</param>
-    /// <returns>El objeto Prestamo actualizado.</returns>
-    Prestamo RegistrarDevolucion(Guid prestamoId);
+    /// <summary>Crea un préstamo resolviendo internamente el usuario autenticado y el libro por Id.</summary>
+    Prestamo CrearPrestamoPorEmail(string email, Guid idLibro);
 
-    /// <summary>
-    /// Obtiene los préstamos activos de un usuario específico.
-    /// </summary>
-    IEnumerable<Prestamo> ObtenerPrestamosPorUsuario(Guid usuarioId);
+    /// <summary>Crea un préstamo resolviendo internamente por identificación de usuario y código ISBN.</summary>
+    Prestamo CrearPrestamoPorIdentificacion(string identificacionUsuario, string isbnLibro, int diasPrestamo = 15);
+
+    /// <summary>Registra la devolución del préstamo restaurando el inventario disponible.</summary>
+    Prestamo RegistrarDevolucion(Guid prestamoId);
 }

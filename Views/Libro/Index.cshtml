@@ -1,33 +1,56 @@
-﻿@model IEnumerable<BibliotecaApp.Models.Libro>
+@model IEnumerable<BibliotecaApp.Models.Libro>
 
 @{
     ViewData["Title"] = "Catálogo de Libros";
     Layout = "_Layout";
+    bool esBibliotecario = User.IsInRole("BIBLIOTECARIO") || User.IsInRole("Bibliotecario");
 }
 
 <div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-3 flex-wrap gap-2">
         <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary fw-bold rounded-3">
-            <i class="bi bi-arrow-left"></i> Volver al Inicio
+            <i class="bi bi-arrow-left"></i> Inicio
         </a>
-        <h2 class="fw-bold text-center m-0" style="color: #003366; flex-grow: 1;">Catálogo de Libros UDB</h2>
-        <div style="width: 140px;"></div> 
+        <h2 class="fw-bold text-center m-0" style="color: #003366;">Catálogo de Libros UDB</h2>
+        <div>
+            @if (esBibliotecario)
+            {
+                <a asp-controller="Libro" asp-action="Crear" class="btn text-white fw-bold rounded-3 shadow-sm" style="background-color: #003366;">
+                    <i class="bi bi-plus-circle me-1"></i> Agregar Libro
+                </a>
+            }
+        </div>
     </div>
 
-    <p class="text-center mb-5 text-muted">Explora nuestra colección y verifica la disponibilidad de ejemplares.</p>
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show fw-bold text-center mb-4 border-0 rounded-3 shadow-sm" role="alert">
+            <i class="bi bi-check-circle me-2"></i> @TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show fw-bold text-center mb-4 border-0 rounded-3 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <p class="text-center mb-4 text-muted">Explora nuestra colección académica y verifica la disponibilidad de ejemplares en estante.</p>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         @foreach (var libro in Model)
         {
             <div class="col">
-                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden bg-light">
+                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden bg-light position-relative">
                     <div class="card-header text-center py-3 border-0" style="background-color: #003366;">
                         <h5 class="card-title mb-0 text-truncate text-white fw-bold" title="@libro.Titulo">
                             @libro.Titulo
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="text-center mb-4 mt-2">
+                        <div class="text-center mb-3 mt-1">
                             <span style="font-size: 3rem; color: #cbd5e1;">📖</span>
                         </div>
                         <p class="card-text mb-2 text-secondary">
@@ -36,16 +59,23 @@
                         <p class="card-text mb-2 text-secondary">
                             <strong style="color: #003366;">Género:</strong> @libro.Genero
                         </p>
-                        <div class="mt-4 text-center">
+                        <p class="card-text mb-2 text-secondary">
+                            <strong style="color: #003366;">ISBN:</strong> <span class="badge bg-light text-dark border">@libro.ISBN</span>
+                        </p>
+                        <div class="mt-3 text-center">
                             @if (libro is BibliotecaApp.Models.LibroFisico libroFisico)
                             {
-                                if ((libroFisico.StockTotal - libroFisico.StockPrestado) > 0)
+                                if (libroFisico.StockDisponible > 0)
                                 {
-                                    <span class="badge bg-success px-3 py-2 rounded-pill">Disponible</span>
+                                    <span class="badge bg-success px-3 py-2 rounded-pill">
+                                        Disponible (@libroFisico.StockDisponible / @libroFisico.StockTotal)
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger px-3 py-2 rounded-pill">Agotado</span>
+                                    <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                        Agotado (0 / @libroFisico.StockTotal)
+                                    </span>
                                 }
                             }
                             else
@@ -54,10 +84,25 @@
                             }
                         </div>
                     </div>
-                    <div class="card-footer bg-transparent border-0 text-center pb-4 pt-2">
-                        <a asp-controller="Libro" asp-action="Detalle" asp-route-id="@libro.Id" class="btn text-white w-100 fw-bold rounded-3" style="background-color: #003366; padding: 12px;">
-                            Ver Detalles
+                    <div class="card-footer bg-transparent border-0 text-center pb-3 pt-2 d-flex flex-column gap-2">
+                        <a asp-controller="Libro" asp-action="Detalle" asp-route-id="@libro.Id" class="btn text-white w-100 fw-bold rounded-3" style="background-color: #003366; padding: 10px;">
+                            <i class="bi bi-eye me-1"></i> Ver Detalles
                         </a>
+
+                        @if (esBibliotecario)
+                        {
+                            <div class="d-flex gap-2">
+                                <a asp-controller="Libro" asp-action="Editar" asp-route-id="@libro.Id" class="btn btn-outline-warning w-50 fw-bold rounded-3 btn-sm py-2">
+                                    <i class="bi bi-pencil"></i> Modificar
+                                </a>
+                                <form asp-controller="Libro" asp-action="Eliminar" asp-route-id="@libro.Id" method="post" class="w-50 m-0">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger w-100 fw-bold rounded-3 btn-sm py-2" title="Eliminar libro permanentemente">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
