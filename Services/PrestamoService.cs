@@ -1,65 +1,81 @@
-using BibliotecaApp.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using BibliotecaApp.Data;
 using BibliotecaApp.Models;
+using BibliotecaApp.Interfaces;
 
 namespace BibliotecaApp.Services;
 
-/// <summary>
-/// Orquesta la lógica de préstamos: crea registros, valida disponibilidad
-/// y delega la actualización de stock a los propios modelos.
-/// </summary>
 public class PrestamoService : IPrestamoService
 {
-    private readonly List<Prestamo> _prestamos = new();
+    private readonly BibliotecaDbContext _context;
 
-    public IReadOnlyList<Prestamo> ObtenerTodos() => _prestamos.AsReadOnly();
+    public PrestamoService(BibliotecaDbContext context)
+    {
+        _context = context;
+    }
 
-    public IEnumerable<Prestamo> ObtenerActivos() => _prestamos.Where(p => p.EstaActivo);
+    public IReadOnlyList<Prestamo> ObtenerTodos()
+        => _context.Prestamos.Include(p => p.Usuario).Include(p => p.Libro).ToList().AsReadOnly();
+
+    public IEnumerable<Prestamo> ObtenerActivos()
+        => _context.Prestamos.Include(p => p.Usuario).Include(p => p.Libro)
+            .AsEnumerable()
+            .Where(p => p.EstaActivo)
+            .ToList();
 
     public IEnumerable<Prestamo> ObtenerPrestamosPorUsuario(Guid usuarioId)
-        => _prestamos.Where(p => p.Usuario.Id == usuarioId);
+        => _context.Prestamos.Include(p => p.Usuario).Include(p => p.Libro).Where(p => p.Usuario.Id == usuarioId).ToList();
 
-    /// <summary>
-    /// Crea un préstamo validando que el usuario no tenga ya ese libro activo
-    /// y que haya stock disponible.
-    /// </summary>
     public Prestamo CrearPrestamo(Usuario usuario, Libro libro)
     {
         ArgumentNullException.ThrowIfNull(usuario);
         ArgumentNullException.ThrowIfNull(libro);
 
-        // Un usuario no puede tener el mismo libro prestado dos veces simultáneamente
-        var yaLoPrestado = _prestamos.Any(p =>
-            p.EstaActivo &&
-            p.Usuario.Id == usuario.Id &&
-            p.Libro.Id == libro.Id);
+        var yaLoPrestado = _context.Prestamos
+            .Where(p => p.Usuario.Id == usuario.Id && p.Libro.Id == libro.Id)
+            .AsEnumerable()
+            .Any(p => p.EstaActivo);
 
         if (yaLoPrestado)
-            throw new InvalidOperationException(
-                $"'{usuario.Nombre}' ya tiene activo un préstamo de '{libro.Titulo}'.");
+            throw new InvalidOperationException($"'{usuario.Nombre}' ya tiene activo un préstamo de '{libro.Titulo}'.");
 
         if (libro is LibroFisico lf)
+        {
             lf.RealizarPrestamo();
+            _context.Entry(lf).State = EntityState.Modified;
+        }
         else
+        {
             throw new InvalidOperationException($"Tipo de libro no soportado: '{libro.GetType().Name}'.");
+        }
 
         var prestamo = new Prestamo(usuario, libro);
-        _prestamos.Add(prestamo);
+        _context.Prestamos.Add(prestamo);
+        _context.SaveChanges();
+
         return prestamo;
     }
 
-    /// <summary>
-    /// Registra la devolución y libera el stock del libro.
-    /// Lanza KeyNotFoundException si el Id no existe, InvalidOperationException si ya fue devuelto.
-    /// </summary>
     public Prestamo RegistrarDevolucion(Guid prestamoId)
     {
-        var prestamo = _prestamos.FirstOrDefault(p => p.Id == prestamoId)
+        var prestamo = _context.Prestamos
+            .Include(p => p.Libro)
+            .FirstOrDefault(p => p.Id == prestamoId)
             ?? throw new KeyNotFoundException($"No se encontró el préstamo con Id '{prestamoId}'.");
 
         prestamo.RegistrarDevolucion();
+        _context.Prestamos.Update(prestamo);
 
         if (prestamo.Libro is LibroFisico lf)
+        {
             lf.RegistrarDevolucion();
+            _context.Entry(lf).State = EntityState.Modified;
+        }
+
+        _context.SaveChanges();
 
         return prestamo;
     }

@@ -23,7 +23,7 @@ public static class DbSeeder
 
         // 3. Semilla de Usuarios Iniciales
         var passAdmin = authService.HashearPassword("Admin1234!");
-        var passEstudiante = authService.HashearPassword("Estudiante1234!");
+        var passEstudiante = authService.HashearPassword("Estudiante1234!git checkout maingit checkout main");
         var passDocente = authService.HashearPassword("Docente1234!");
 
         var admin = new Bibliotecario(

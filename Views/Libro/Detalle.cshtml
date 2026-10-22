@@ -1,0 +1,93 @@
+﻿@model BibliotecaApp.Models.Libro
+
+@{
+    ViewData["Title"] = "Detalles del Libro";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="card shadow border-0 rounded-4 overflow-hidden bg-light">
+        <div class="card-header text-center" style="background-color: #003366; padding: 15px 25px;">
+            <h3 class="mb-0 text-white fw-bold">Información del Ejemplar</h3>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center mb-4 mb-md-0">
+                    <div class="bg-white rounded-4 p-5 border border-2 border-dashed shadow-sm">
+                        <span style="font-size: 7rem; color: #94a3b8;">📖</span>
+                    </div>
+                </div>
+
+                <div class="col-md-8 ps-md-5">
+                    <h2 class="fw-bold mb-2" style="color: #003366;">@Model.Titulo</h2>
+                    <h5 class="text-muted mb-4">Por: <strong class="text-dark">@Model.Autor</strong></h5>
+
+                    <div class="row mb-4">
+                        <div class="col-sm-6 mb-3">
+                            <span class="text-muted small">Género Literario</span><br />
+                            <strong class="fs-6">@Model.Genero</strong>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <span class="text-muted small">Año de Publicación</span><br />
+                            <strong class="fs-6">@Model.AnioPublicacion</strong>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <span class="text-muted small">Código ISBN</span><br />
+                            <strong class="fs-6">@Model.ISBN</strong>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <span class="text-muted small">Estado Actual</span><br />
+                            @if (Model is BibliotecaApp.Models.LibroFisico libroFisico)
+                            {
+                                if ((libroFisico.StockTotal - libroFisico.StockPrestado) > 0)
+                                {
+                                    <span class="badge bg-success px-3 py-2 mt-1">
+                                        Disponible (@(libroFisico.StockTotal - libroFisico.StockPrestado) en estante)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger px-3 py-2 mt-1">Agotado</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary px-3 py-2 mt-1">Libro Digital</span>
+                            }
+                        </div>
+                    </div>
+
+                    <hr class="text-muted my-4" />
+
+                    @if (TempData["Mensaje"] != null)
+                    {
+                        <div class="alert alert-success fw-bold text-center mb-3 border-0 rounded-3">
+                            <i class="bi bi-check-circle me-2"></i> @TempData["Mensaje"]
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger fw-bold text-center mb-3 border-0 rounded-3">
+                            <i class="bi bi-exclamation-circle me-2"></i> @TempData["Error"]
+                        </div>
+                    }
+
+                    <div class="d-flex flex-wrap gap-3 mt-4">
+                        <form asp-controller="Prestamo" asp-action="Solicitar" method="post" class="m-0">
+                            <input type="hidden" name="idLibro" value="@Model.Id" />
+                            <button type="submit" class="btn text-white fw-bold rounded-3 px-4 py-2" style="background-color: #003366;">
+                                Solicitar Préstamo
+                            </button>
+                        </form>
+
+                        <a asp-controller="Libro" asp-action="Index" class="btn btn-outline-secondary fw-bold rounded-3 px-4 py-2">
+                            Volver al Catálogo
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
