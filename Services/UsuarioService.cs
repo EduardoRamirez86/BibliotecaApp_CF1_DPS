@@ -1,17 +1,48 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using BibliotecaApp.Data;
+using BibliotecaApp.DTOs.Usuarios;
 using BibliotecaApp.Interfaces;
 using BibliotecaApp.Models;
 
 namespace BibliotecaApp.Services;
 
 /// <summary>
-/// Gestiona el registro y consulta de usuarios en memoria.
-/// Implementa IUsuarioService e IBuscable&lt;Usuario&gt;.
+/// Gestiona la consulta y persistencia de usuarios en SQL Server mediante Entity Framework Core.
 /// </summary>
 public class UsuarioService : IUsuarioService
 {
-    private readonly List<Usuario> _usuarios = new();
+    private readonly BibliotecaDbContext _context;
 
-    public IReadOnlyList<Usuario> ObtenerTodos() => _usuarios.AsReadOnly();
+    public UsuarioService(BibliotecaDbContext context)
+    {
+        _context = context;
+    }
+
+    public IReadOnlyList<Usuario> ObtenerTodos() => _context.Usuarios.AsNoTracking().ToList().AsReadOnly();
+
+    public IReadOnlyList<UsuarioResumenDto> ObtenerResumenTodos()
+        => _context.Usuarios
+            .AsNoTracking()
+            .Select(u => new UsuarioResumenDto
+            {
+                Id = u.Id,
+                Nombre = u.Nombre,
+                Identificacion = u.Identificacion,
+                Email = u.Email,
+                Rol = u.ObtenerRol()
+            })
+            .ToList()
+            .AsReadOnly();
+
+    public Usuario? ObtenerPorEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return null;
+        var emailNormalizado = email.Trim().ToLowerInvariant();
+        return _context.Usuarios.FirstOrDefault(u => u.Email == emailNormalizado);
+    }
 
     public void Registrar(Usuario usuario)
     {
@@ -21,37 +52,24 @@ public class UsuarioService : IUsuarioService
             throw new InvalidOperationException(
                 $"Ya existe un usuario con la identificación '{usuario.Identificacion}'.");
 
-        _usuarios.Add(usuario);
+        _context.Usuarios.Add(usuario);
+        _context.SaveChanges();
     }
 
     public bool ExisteIdentificacion(string identificacion)
-        => _usuarios.Any(u =>
-            u.Identificacion.Equals(identificacion, StringComparison.OrdinalIgnoreCase));
+        => _context.Usuarios.Any(u => u.Identificacion.ToLower() == identificacion.ToLower());
 
     public IEnumerable<Usuario> BuscarPorTexto(string termino)
     {
-        if (string.IsNullOrWhiteSpace(termino)) return _usuarios;
+        if (string.IsNullOrWhiteSpace(termino)) return ObtenerTodos();
 
-        return _usuarios.Where(u =>
-        {
-            var coincideBase =
-                u.Nombre.Contains(termino, StringComparison.OrdinalIgnoreCase) ||
-                u.Identificacion.Contains(termino, StringComparison.OrdinalIgnoreCase);
-
-            var coincideDetalle = u switch
-            {
-                Estudiante e =>
-                    e.Carne.Contains(termino, StringComparison.OrdinalIgnoreCase) ||
-                    e.Carrera.Contains(termino, StringComparison.OrdinalIgnoreCase),
-                Docente d =>
-                    d.NumeroEmpleado.Contains(termino, StringComparison.OrdinalIgnoreCase) ||
-                    d.Departamento.Contains(termino, StringComparison.OrdinalIgnoreCase),
-                _ => false
-            };
-
-            return coincideBase || coincideDetalle;
-        });
+        return _context.Usuarios
+            .AsNoTracking()
+            .Where(u => u.Nombre.Contains(termino) ||
+                        u.Identificacion.Contains(termino) ||
+                        u.Email.Contains(termino))
+            .ToList();
     }
 
-    public Usuario? ObtenerPorId(Guid id) => _usuarios.FirstOrDefault(u => u.Id == id);
+    public Usuario? ObtenerPorId(Guid id) => _context.Usuarios.FirstOrDefault(u => u.Id == id);
 }

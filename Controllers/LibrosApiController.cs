@@ -1,88 +1,126 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using BibliotecaApp.Data; // Referencia al DbContext del proyecto (base de datos)
-using BibliotecaApp.Models; // Referencia a los modelos del proyecto
+using System;
+using Microsoft.AspNetCore.Mvc;
+using BibliotecaApp.DTOs.Libros;
+using BibliotecaApp.Interfaces;
 
 namespace BibliotecaApp.Controllers
 {
-    // ApiController sirve para indicar que el controlador es una API y este va a devolver un json
+    /// <summary>
+    /// Controlador Web API delgado para la gestión RESTful de libros.
+    /// Delega el 100% de la lógica y persistencia a ILibroService sin inyectar DbContext.
+    /// </summary>
     [ApiController]
-    // Se definer la ruta de la API, la cual es /api/LibrosApi
     [Route("api/[controller]")]
-    // Clase publica que hereda de ControllerBase
     public class LibrosApiController : ControllerBase
     {
-        private readonly BibliotecaDbContext _context;
+        private readonly ILibroService _libroService;
 
-        // Se le inyecta el DbContext para poder acceder a la base de datos
-        public LibrosApiController(BibliotecaDbContext context)
+        public LibrosApiController(ILibroService libroService)
         {
-            _context = context;
+            _libroService = libroService;
         }
 
-
-        // ENDPOINT PARA VERIFICAR LA DISPONIBILIDAD DE UN LIBRO POR SU ID (ISBN)
-
-        // La ruta del endpoint (GET) /api/LibrosApi/{isbn}/disponibilidad
+        // GET: /api/LibrosApi/{isbn}/disponibilidad
         [HttpGet("{isbn}/disponibilidad")]
-        public async Task<IActionResult> VerificarDisponibilidad(string isbn)
+        public IActionResult VerificarDisponibilidad(string isbn)
         {
-            // Se busca el libro en la base de datos por su id (ISBN)
-            var libro = await _context.LibrosFisicos.FirstOrDefaultAsync(l => l.ISBN == isbn);
-            // En caso que no exista un libro, se devuelve un error (Error 404 Not Found) en formato json
-            if (libro == null)
+            try
             {
-                return NotFound(new { mensaje = $"No se encontró ningún libro con ese ISBN {isbn}" });
+                var disponibilidad = _libroService.VerificarDisponibilidad(isbn);
+                return Ok(disponibilidad);
             }
-
-            // Si el stock total es mayor a 0, entonces se marca como disponible
-            bool estaDisponible = libro.StockTotal > 0;
-
-            // Se retorna un objeto del tipo anonimo, ya que asp.net se encarga de transformarlo de manera automatica a json (gracias a Ok(),
-            // ya que ASP.NET Core activa automaticamente su motor interno para convertir objetos a texto)
-            return Ok(new
+            catch (KeyNotFoundException ex)
             {
-                /* Un objeto de tipo anonimo es crear un objeto sin tener que crear un archivo con una clase nueva que
-            solo se use una vez Su estructura es new {}  sin poner el nombre de ninguna clase */
-                id = libro.Id,
-                titulo = libro.Titulo,
-                isbn = libro.ISBN,
-                stockDisponible = libro.StockTotal,
-                disponible = estaDisponible,
-                mensaje = estaDisponible ? "El libro se encuentra disponible para prestamos." : "Lo sentimos, el libro no se encuentra disponible en este momento."
-            });
+                return NotFound(new { mensaje = ex.Message });
+            }
         }
 
-
-        // ENDPOINT PARA VERIFICAR TODO EL CATALOGO DE LIBROS
-
-        // La ruta del endpoint (GET): /api/LibrosApi
+        // GET: /api/LibrosApi
         [HttpGet]
-        public async Task<IActionResult> ObtenerCatalogo()
+        public IActionResult ObtenerCatalogo()
         {
-            // Se obtienen todos los registros de la tabla LibrosFisicos, utilizando Entity Framework
-            var libros = await _context.LibrosFisicos.ToListAsync();
-            // Si no hay errores, se muestra la lista completa en formato json, con un codigo 200 (success)
+            var libros = _libroService.ObtenerTodos();
             return Ok(libros);
         }
 
-
-
-        // ENDPOINT PARA REGISTRAR (INSERTAR) UN NUEVO LIBRO
-
-        // La ruta del endpoint (POST): /api/LibrosApi
+        // POST: /api/LibrosApi
         [HttpPost]
-        public async Task<IActionResult> RegistrarLibro([FromBody] LibroFisico libro)
+        public IActionResult RegistrarLibro([FromBody] LibroFormDto dto)
         {
-            // [FromBody] sirve para indicar que los datos del libro vienen en el cuerpo de la petición HTTP
-            _context.LibrosFisicos.Add(libro);
-            // Se realiza el insert en la base de datos
-            await _context.SaveChangesAsync();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            // Si no hay errores, entonces se devuelve un codigo 201 (created) mostrando la nueva ruta para poder consultar el registro del libro recien creado
-            return CreatedAtAction(nameof(VerificarDisponibilidad), new { isbn = libro.ISBN }, libro);
+            try
+            {
+                var nuevoLibro = _libroService.Crear(dto);
+
+                return CreatedAtAction(
+                    nameof(VerificarDisponibilidad),
+                    new { isbn = nuevoLibro.ISBN },
+                    nuevoLibro
+                );
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
 
+        // PUT: /api/LibrosApi/{id}
+        [HttpPut("{id}")]
+        public IActionResult ActualizarLibro(Guid id, [FromBody] LibroFormDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                _libroService.Actualizar(id, dto);
+                return Ok(new { mensaje = "Libro actualizado exitosamente.", id = id });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { mensaje = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
+        // DELETE: /api/LibrosApi/{id}
+        [HttpDelete("{id}")]
+        public IActionResult EliminarLibro(Guid id)
+        {
+            try
+            {
+                _libroService.Eliminar(id);
+                return Ok(new { mensaje = "Libro eliminado del catálogo exitosamente." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { mensaje = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error interno al eliminar el libro: " + ex.Message });
+            }
+        }
     }
 }
