@@ -18,3 +18,6 @@ packages/
 *.dll
 *.exe
 *.app
+
+# Guías de Estudio Locales / Privadas
+ManualEstudio.md
