@@ -40,9 +40,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
-builder.Services.AddScoped<BibliotecaApp.Services.LibroService>();
-builder.Services.AddScoped<BibliotecaApp.Services.PrestamoService>();
-
 var app = builder.Build();
 
 // Creación automática de base de datos

@@ -96,9 +96,9 @@ public class AuthController : Controller
         return RedirectToAction(nameof(Login));
     }
 
+    [HttpGet]
     [HttpPost]
     [Authorize]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         await _authService.CerrarSesionAsync(HttpContext);

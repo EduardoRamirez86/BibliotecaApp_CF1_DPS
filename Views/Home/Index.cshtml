@@ -25,10 +25,21 @@
         </p>
     </div>
 
-    <!-- Botón de acceso al Catálogo (Nuestra nueva integración) -->
-    <div style="margin: 30px 0; text-align: center;">
-        <a asp-controller="Libro" asp-action="Index" class="btn-primary-udb" style="display: block; text-decoration: none; padding: 16px; font-size: 16px; font-weight: bold; width: 100%;">
-            <i class="bi bi-book me-2"></i> Explorar el Catálogo de Libros
+    <!-- Botones de acceso rápido -->
+    <div style="margin: 25px 0; display: flex; flex-direction: column; gap: 12px;">
+        <a asp-controller="Libro" asp-action="Index" class="btn-primary-udb" style="display: block; text-decoration: none; padding: 14px; font-size: 15px; font-weight: bold; width: 100%;">
+            <i class="bi bi-book me-2"></i> Explorar Catálogo de Libros
+        </a>
+
+        @if (rol.Equals("Bibliotecario", StringComparison.OrdinalIgnoreCase))
+        {
+            <a asp-controller="Libro" asp-action="Crear" class="btn-primary-udb" style="display: block; text-decoration: none; padding: 14px; font-size: 15px; font-weight: bold; width: 100%; background-color: var(--udb-gold); color: #002b5c;">
+                <i class="bi bi-plus-circle me-2"></i> Registrar Nuevo Libro (Admin)
+            </a>
+        }
+
+        <a asp-controller="Prestamo" asp-action="Index" class="btn-primary-udb" style="display: block; text-decoration: none; padding: 14px; font-size: 15px; font-weight: bold; width: 100%; background-color: #0284c7;">
+            <i class="bi bi-card-checklist me-2"></i> Mis Préstamos Registrados
         </a>
     </div>
 
