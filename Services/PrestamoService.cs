@@ -6,6 +6,7 @@ using BibliotecaApp.Data;
 using BibliotecaApp.DTOs.Prestamos;
 using BibliotecaApp.Interfaces;
 using BibliotecaApp.Models;
+using BibliotecaApp.Interfaces;
 
 namespace BibliotecaApp.Services;
 
