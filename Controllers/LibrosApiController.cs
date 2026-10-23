@@ -10,7 +10,12 @@ namespace BibliotecaApp.Controllers
     /// Delega el 100% de la lógica y persistencia a ILibroService sin inyectar DbContext.
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    //apicontrollers Habilita comportamientos específicos de API REST,
+    //como la inferencia de parámetros de origen ([FromBody]),
+    //la validación automática del estado del modelo (ModelState)
+    //y respuestas JSON estandarizadas.
+    [Route("api/[controller]")]// esta onda espacifica un controlador de api
+    //mediante el atributo "ROUTE"
     public class LibrosApiController : ControllerBase
     {
         private readonly ILibroService _libroService;
@@ -46,6 +51,8 @@ namespace BibliotecaApp.Controllers
         // POST: /api/LibrosApi
         [HttpPost]
         public IActionResult RegistrarLibro([FromBody] LibroFormDto dto)
+        //Indica al framework que debe deserializar el objeto LibroFormDto
+        //desde el cuerpo (body) de la petición HTTP en formato JSON.
         {
             if (!ModelState.IsValid)
             {
@@ -121,7 +128,7 @@ namespace BibliotecaApp.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { mensaje = "Error interno al eliminar el libro: " + ex.Message });
-            }
+            }// devuelve ese error como no encontrado o controlado en el servidor
         }
     }
 }

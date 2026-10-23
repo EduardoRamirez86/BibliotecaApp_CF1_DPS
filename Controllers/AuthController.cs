@@ -45,6 +45,9 @@ public class AuthController : Controller
         ViewData["ReturnUrl"] = returnUrl;
 
         if (!ModelState.IsValid)
+        //propiedad nos permite verificar si el estado de
+        //las validaciones definidas en las anotaciones de un
+        //DTO fue satisfactorio
         {
             return View(model);
         }
@@ -60,6 +63,8 @@ public class AuthController : Controller
         _logger.LogInformation("Usuario autenticado correctamente: {Email}", model.Email);
 
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        //validacion de seguridad para evitar redirecciones
+        //maliciosas a sitios externos
         {
             return Redirect(returnUrl);
         }

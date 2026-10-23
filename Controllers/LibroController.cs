@@ -67,6 +67,7 @@ namespace BibliotecaApp.Controllers
             {
                 var libro = _libroService.Crear(model);
                 TempData["Mensaje"] = $"¡Libro '{libro.Titulo}' registrado exitosamente en el catálogo!";
+                //(data temp) diccionario temporal que se puede usar para dar mensajes de exito
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

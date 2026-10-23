@@ -5,9 +5,11 @@ using BibliotecaApp.Interfaces;
 using BibliotecaApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+//EL ORDEN CORRECTO DE INVOCACION DE LOS MIDDLEWARE DE SEGURIDAD
+//ES: 1) UseAuthentication() 2) UseAuthorization() OSEA VERIFICA LOS PERMISOS QUE TIENE
 // Habilita la arquitectura MVC
 builder.Services.AddControllersWithViews();
+//CONTROLADORES MVC Y SUS VISTAS EN EL CONTENEDOR
 
 // Configuración de Base de Datos
 builder.Services.AddDbContext<BibliotecaDbContext>(options =>
@@ -22,6 +24,7 @@ builder.Services.AddDbContext<BibliotecaDbContext>(options =>
 });
 
 // Servicios de Lógica de Negocio y Seguridad
+//SERVICIOS DE APLICACION
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ILibroService, LibroService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -32,8 +35,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Auth/Login";
+        //establece la ruta a la que se redirige automáticamente
+        //un usuario no autenticado que intenta acceder a un controlador con
+        //[Authorize]
         options.LogoutPath = "/Auth/Logout";
-        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.AccessDeniedPath = "/Auth/AccessDenied";//establece la vista
+                                                        //a la que se redirige
+                                                        //a un usuario cuando
+                                                        //carece de los roles
+                                                        //requeridos por
+                                                        //[Authorize(Roles = ...)]
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
         options.Cookie.HttpOnly = true;
@@ -76,12 +87,15 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+//IMPORTANTE IMPORTANTE
+
 // Middleware de Autenticación y Autorización
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Codigo necesario para poder mapear las rutas de la web API
 app.MapControllers();
+//METODO PARA MAPEAR LAS RUTAS DE LOS CONTROLADORES WEB API
 
 // Por defecto abrimos la pantalla de Login
 app.MapControllerRoute(
