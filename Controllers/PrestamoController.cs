@@ -13,7 +13,7 @@ namespace BibliotecaApp.Controllers
     [Authorize]
     public class PrestamoController : Controller
     {
-        private readonly IPrestamoService _prestamoService;
+        private readonly IPrestamoService _prestamoService;// inyecta mediante dependencias por constructor
 
         public PrestamoController(IPrestamoService prestamoService)
         {
@@ -23,7 +23,8 @@ namespace BibliotecaApp.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name;//para recuperar el
+            //email del user  autenticado para hacer sus huevadas
             if (string.IsNullOrEmpty(email))
             {
                 return RedirectToAction("Login", "Auth");
@@ -38,6 +39,7 @@ namespace BibliotecaApp.Controllers
         public IActionResult Solicitar(Guid idLibro)
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity?.Name;
+            // el claimtypes.email verifica que el estudiante este activo
             if (string.IsNullOrEmpty(email))
             {
                 return RedirectToAction("Login", "Auth");

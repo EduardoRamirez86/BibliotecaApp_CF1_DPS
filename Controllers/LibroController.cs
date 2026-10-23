@@ -14,7 +14,7 @@ namespace BibliotecaApp.Controllers
     [Authorize]
     public class LibroController : Controller
     {
-        private readonly ILibroService _libroService;
+        private readonly ILibroService _libroService;//inyecta mediante dependencias por constructor
 
         public LibroController(ILibroService libroService)
         {
@@ -40,12 +40,14 @@ namespace BibliotecaApp.Controllers
             return View(libro);
         }
 
-        // ==========================================
+        
         // MÓDULO DE ADMINISTRACIÓN (SOLO BIBLIOTECARIO)
-        // ==========================================
+       
 
         [HttpGet]
         [Authorize(Roles = "BIBLIOTECARIO,Bibliotecario")]
+        //atributo de seguridad para restringir las acciones Crear Editar y Elimineitor
+        //exclusivo del perfil bibliotecario
         public IActionResult Crear()
         {
             return View(new LibroFormDto());
@@ -130,6 +132,7 @@ namespace BibliotecaApp.Controllers
 
         [HttpPost]
         [Authorize(Roles = "BIBLIOTECARIO,Bibliotecario")]
+        //deniega el acceso y el middleware de autenticación lo redirige la ruta especificada
         [ValidateAntiForgeryToken]
         public IActionResult Eliminar(Guid id)
         {
@@ -144,6 +147,8 @@ namespace BibliotecaApp.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+            //ESTA ONDA REDIRIGE AL NAVEGADOR WEB REALIZANDO UNA NUEVA
+            //PETICION HTTP HACIA EL  INDEX DEL CONTROLADOR casacontroler xd
         }
     }
 }

@@ -15,6 +15,7 @@ namespace BibliotecaApp.Controllers
     {
         private readonly IUsuarioService _usuarioService;
         private readonly IAuthService _authService;
+        // iterfaces que inyecta el controlador web api para la consulta y registro de usuarios
 
         public UsuariosApiController(IUsuarioService usuarioService, IAuthService authService)
         {

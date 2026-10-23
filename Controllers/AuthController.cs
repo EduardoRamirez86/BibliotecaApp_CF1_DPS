@@ -11,7 +11,9 @@ namespace BibliotecaApp.Controllers;
 public class AuthController : Controller
 {
     private readonly IAuthService _authService;
-    private readonly ILogger<AuthController> _logger;
+    private readonly ILogger<AuthController> _logger; 
+
+    //estos gestionan la autenticacion  yel registro de usuarios
 
     public AuthController(IAuthService authService, ILogger<AuthController> logger)
     {
@@ -23,7 +25,7 @@ public class AuthController : Controller
     [AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
     {
-        if (User.Identity?.IsAuthenticated == true)
+        if (User.Identity?.IsAuthenticated == true)//exrae el name del user autenticado
         {
             return RedirectToAction("Index", "Home");
         }
@@ -34,7 +36,10 @@ public class AuthController : Controller
 
     [HttpPost]
     [AllowAnonymous]
+    //
     [ValidateAntiForgeryToken]
+    //este valida osea previene ataques de falsificación de solicitudes entre sitios (CSRF)
+    //verificando el token de seguridad eviado en el formulario
     public async Task<IActionResult> Login(LoginDto model, string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
@@ -64,6 +69,7 @@ public class AuthController : Controller
 
     [HttpGet]
     [AllowAnonymous]
+    //permite que invitados puedan acceder a la vista de registro
     public IActionResult Register()
     {
         if (User.Identity?.IsAuthenticated == true)
